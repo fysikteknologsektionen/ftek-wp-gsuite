@@ -74,7 +74,7 @@ class Ftek_GSuite {
       $html = '';
       foreach ($members as $member) {
          $user_id = get_user_by( 'email', $member->email );
-         $user_id = $user_id['ID'];
+         $user_id = $user_id->ID;
          $nickname = get_user_meta($user_id, 'nickname', true);
          if ($nickname) { $nickname = '&ldquo;'.$nickname.'&rdquo; '; }
          $html .= '<div class="member">'
