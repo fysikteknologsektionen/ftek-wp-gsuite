@@ -3,35 +3,18 @@
 /**
 * The file that defines the core plugin class
 *
-* @since      0.1.0
+* @since      1.0.0
 *
 * @package    Ftek_GSuite
 * @subpackage Ftek_GSuite/includes
 */
 
 class Ftek_GSuite {
-
-   protected $gsuite_raw_client;
-   protected $gsuite_client;
-
+   
    public function __construct(  ) {
-      $this->load_dependencies();
+      require_once 'class-ftek-gsuite-updater.php';
       $this->define_hooks();
-      $this->gsuite_raw_client = $this->set_gsuite_raw_client();
-      $this->gsuite_client = $this->set_gsuite_client( $this->gsuite_client );
 	}
-   
-   /**
-   * Load the required dependencies for this plugin.
-   *
-   * @since    0.1.0
-   * @access   private
-   */
-   
-	private function load_dependencies() {
-      // Include Google's PHP library.
-		require_once plugin_dir_path( __DIR__ ) . 'vendor/google-api-php-client/vendor/autoload.php';
-   }
    
    /**
    * Setup hooks.
@@ -49,201 +32,76 @@ class Ftek_GSuite {
       // Settings
       add_action( 'admin_menu', array( $this, 'add_admin_menu' ) );
       add_action( 'admin_init', array( $this, 'settings_init' ) );
-
+      add_action('ftek_gsuite_fetch_updates', array($this, 'update_cache'));
+      
       add_shortcode('ftek_gsuite_members', array($this, 'member_shortcode'));
    }
    
-   private function set_gsuite_raw_client() {
-      if (!$this->is_setup_functional()) {
-         return null;
-      }
-      $client = new Google_Client();
-      $client->setAuthConfig($this->get_credentials_path());
-      $client->setApplicationName("Ftek GSuite Plugin");
-      $client->setScopes([
-         'https://www.googleapis.com/auth/admin.directory.group.readonly',
-         'https://www.googleapis.com/auth/admin.directory.user.readonly',
-         'https://www.googleapis.com/auth/admin.directory.userschema.readonly'
-      ]);
-      $client->setSubject($this->get_admin_email());
-      return $client;
+   public static function update_cache() {
+      $updater = new Ftek_GSuite_Updater();
+      $updater->update_cache();
    }
 
-   private function set_gsuite_client( $client ) {
-      if (!$this->is_setup_functional()) {
-         return null;
-      }
-      $service_client = new Google_Service_Directory($client);
-      return $service_client;
-   }
-   
-   /**
-   * Getter for the admin email
-   *
-   * @since    0.1.0
-   * @access   private
-   */
-   private function get_admin_email() {
+   public static function get_admin_email() {
       $options = get_option( 'ftek_gsuite_settings' );
       return $options['ftek_gsuite_impersonator_email'];
    }
-
-   /**
-   * Getter for the credentials file path.
-   *
-   * @since    0.1.0
-   * @access   private
-   */   
-   private function get_credentials_path() {
+   
+   public static function get_credentials_path() {
       $options = get_option( 'ftek_gsuite_settings' );
       return $options['ftek_gsuite_credentials_path'];
    }
    
-   private function is_setup_functional() {  
-      // Check path
-      $cred_path = $this->get_credentials_path();
-      if (!$cred_path || !$this->get_admin_email()) {
-         return false;
-      }
-      // Check file contents
-      $contents = file_get_contents($cred_path);
-      if (!$contents) {
-         return false;
-      }
-      $cred_file = json_decode($contents, true);
-      if ( $cred_file['type']!=='service_account' ) {
-         return false;
-      }
-      return true;
-   }
-
-   /**
-   * Test call data.
-   *
-   * @since    0.1.0
-   * @access   private
-   */
-   private function get_test_data() {
-      $response = $this->gsuite_client->users->get($this->get_admin_email(), array('projection'=>'full'));
-      $user = array(
-         'name'   =>$response->name,
-         'email'  =>$response->primaryEmail,
-         'title'  =>$response->organizations[0]['title'],
-         'role'   =>$response->organizations[0]['description'],
-         'CID'    =>$response->customSchemas['Sektion']['CID']
-      );
-      return $user;
-   }
    
-
-
-   private function profile_pic_src($photo) {
-      return 'data:'.$photo->mimeType. ';charset=utf-8;base64, ' .strtr($photo->photoData,'-_','+/');
-   }
-
-   private function get_profile_pic( $email ) {
-      try {
-         $photo = $this->gsuite_client->users_photos->get($email);
-         return '<img src="'.$this->profile_pic_src($photo).'" />';
-      } catch (Exception $e) {
-         $email_hash = md5( strtolower( trim( $email ) ) );
-         $url = "https://www.gravatar.com/avatar/".$email_hash."?s=96&d=mm&f=y";
-         return '<img src="'.$url.'" />';
-      }
-   }
-   
-   private function get_group_members( $email ) {
-      try {
-         $members = array();
-         $response = new stdClass();
-         $response->nextPageToken = null;
-         do {
-            $opts = array(
-               'includeDerivedMembership' => true,
-               'pageToken' => $response->nextPageToken
-            );
-            $response = $this->gsuite_client->members->listMembers($email, $opts);
-
-            $response_members = array_filter($response->members, function($member) {
-               return $member->type==='USER';
-            });
-
-            $this->gsuite_raw_client->setUseBatch(true);
-            $batch = new Google_Http_Batch($client);
-            $response_members = array_walk($response_members, function($member) {
-               $user = $this->gsuite_client->users->get($member->email, array('projection'=>'full'));
-               $batch->add($user, $member->email);
-            });
-            $batch_results = $batch->execute();
-            $response_members = array_map(function($member) {
-               $user = $batch_results['response-'.$member->email];
-               $m = new stdClass();
-               $m->email = $member->email;
-               $m->name = $user->name['fullName'];
-               $m->name = $user->name['fullName'];
-               return $m;
-            }, $response_members);
-            $this->gsuite_raw_client->setUseBatch(false);
-
-
-            $members = array_merge($members, $response_members);
-         } while ($response->nextPageToken);
-      } catch(Exception $e) {
-         return null;
-      }
-      usort($members, function($a, $b) {
-         $role_order = ['Ordförande', 'Vice ordförande', 'Kassör', 'Ledamot'];
-         if (!in_array($a->type, $role_order)) { $a->type = 'Ledamot'; }
-         if (!in_array($b->type, $role_order)) { $b->type = 'Ledamot'; }
-         return array_search($a->type, $role_order) - array_search($b->type, $role_order);
-      });
-      return $members;
-   }
-
    // Shortcodes
    public function member_shortcode( $atts, $content = null ) {
       extract( shortcode_atts( array(
-         'group' => ''
+         'group' => '',
+         'include' => false
       ), $atts ) );
       if ($group === '') {
          return '';
       }
-
-      $members = $this->get_group_members( $group );
+      $groups = json_decode(get_option('ftek_gsuite_groups'));
+      if (!property_exists($groups, $group)) {
+         return '';
+      }
+      $members = $groups->$group;
+      $members = array_filter($members, function($m) { return $m->show; });
       if (!$members) {
          return '';
       }
-      return '<pre>'.print_r($members, true).'</pre>';
       $html = '';
       foreach ($members as $member) {
          $user_id = get_user_by( 'email', $member->email );
-         $user_id = $user_id->ID;
+         $user_id = $user_id['ID'];
+         $nickname = get_user_meta($user_id, 'nickname', true);
+         if ($nickname) { $nickname = '&ldquo;'.$nickname.'&rdquo; '; }
          $html .= '<div class="member">'
-         . get_profile_pic( $member->email )
-           . '<div class="member-info">'
-               . '<div class="member-name">'
-                   . $member->name
-               . '</div>'
-               . '<div class="member-meta">'
-                   . '<span class="member-position">'
-                       . $member->position
-                   . '</span>'
-                   . '(<a href="mailto:'.$member->email.'" class="member-email" target="_blank" rel="noopener">'.$member->email.'</a>)'
-               . '</div>'
-               . '<div class="member-bio">'
-                   . get_user_meta($user_id, 'description', true)
-               . '</div>'
-        . '</div>'
-        . '</div>';
+         . Ftek_GSuite_Updater::get_profile_pic($member->photo)
+         . '<div class="member-info">'
+         . '<div class="member-name">'
+         . $member->givenName.' '.$nickname.$member->familyName
+         . '</div>'
+         . '<div class="member-meta">'
+         . '<span class="member-position">'
+         . $member->position
+         . '</span>'
+         . ' (<a href="mailto:'.$member->email.'" class="member-email" target="_blank" rel="noopener">'.$member->email.'</a>)'
+         . '</div>'
+         . '<div class="member-bio">'
+         . get_user_meta($user_id, 'description', true)
+         . '</div>'
+         . '</div>'.'</div>';
       }
       return $html;
    }
-
+   
    // Settings Page
    public function add_admin_menu(  ) { 
       add_options_page( 'Ftek G Suite', 'Ftek G Suite', 'manage_options', 'ftek_gsuite', array($this, 'options_page' ));
    }
-
+   
    public function settings_init(  ) { 
       register_setting( 'pluginPage', 'ftek_gsuite_settings' );
       // Instructions
@@ -306,15 +164,15 @@ class Ftek_GSuite {
    }
    
    public function settings_test_callback(  ) {
-
+      
       // Check path
-      $cred_path = $this->get_credentials_path();
+      $cred_path = self::get_credentials_path();
       if (!$cred_path) {
          echo __('No credentials file set.', 'ftek_gsuite');
          return;
       }
       // Check email
-      $email = $this->get_admin_email();
+      $email = self::get_admin_email();
       if (!$email) {
          echo __('No admin email set.', 'ftek_gsuite');
          return;
@@ -333,10 +191,10 @@ class Ftek_GSuite {
       }
       // Make a test call
       try {
-         $user = $this->get_test_data();
+         $updater = new Ftek_GSuite_Updater();
+         $user = $updater->get_test_data();
          echo '<p>'. __( 'Test call successful! Here are the results:', 'ftek_gsuite' ). '</p>';
          echo '<pre>' . json_encode($user, JSON_PRETTY_PRINT) . '</pre>';
-         echo $this->get_profile_pic($user['email']);
       } catch (Google_Service_Exception $e) {
          echo '<p>'. __( 'Test call failed! Here is the error message:', 'ftek_gsuite' ). '</p>';
          echo '<pre>' . json_encode(json_decode($e->getMessage()), JSON_PRETTY_PRINT) . '</pre>';
