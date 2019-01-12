@@ -83,7 +83,8 @@ class Ftek_GSuite {
          $user_id = get_user_by( 'email', $member->email );
          $user_id = $user_id->ID;
          $nickname = get_user_meta($user_id, 'nickname', true);
-         if ($nickname!=='null' && (substr($nickname, -8) !== '@ftek.se')) {
+         if (substr($nickname, -8) !== '@ftek.se' || $nickname === 'null') { $nickname = null; }
+         if ($nickname) {
             $nickname = '&ldquo;'.$nickname.'&rdquo; '; 
          }
          $html .= '<div class="member">'
