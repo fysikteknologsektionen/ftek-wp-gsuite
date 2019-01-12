@@ -197,7 +197,7 @@ class Ftek_GSuite_Updater {
     
     public function update_cache() {
         if (function_exists('wp_get_terms_meta')) { 
-            $groups = get_categories();
+            $groups = get_categories(array("hide_empty" => 0));
             $groups = array_values(array_filter($groups, function($group){
                 return wp_get_terms_meta($group->cat_ID, 'email' ,true);
             }));
