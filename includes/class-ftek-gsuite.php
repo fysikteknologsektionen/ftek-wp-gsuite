@@ -29,11 +29,15 @@ class Ftek_GSuite {
          return $links;
       });
       
+      // Require sign-in-with-google plugin
+      add_action( 'admin_init', 'ftek_gsuite_required_plugin_activated' );
+      
       // Settings
       add_action( 'admin_menu', array( $this, 'add_admin_menu' ) );
       add_action( 'admin_init', array( $this, 'settings_init' ) );
       add_action('ftek_gsuite_fetch_updates', array($this, 'update_cache'));
       
+      // Shortcode
       add_shortcode('ftek_gsuite_members', array($this, 'member_shortcode'));
    }
    
@@ -41,7 +45,7 @@ class Ftek_GSuite {
       $updater = new Ftek_GSuite_Updater();
       $updater->update_cache();
    }
-
+   
    public static function get_admin_email() {
       $options = get_option( 'ftek_gsuite_settings' );
       return $options['ftek_gsuite_impersonator_email'];

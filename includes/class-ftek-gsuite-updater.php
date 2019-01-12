@@ -28,7 +28,7 @@ class Ftek_GSuite_Updater {
     
 	private function load_dependencies() {
         // Include Google's PHP library.
-        require_once plugin_dir_path( __DIR__ ) . 'vendor/google-api-php-client/vendor/autoload.php';
+        require_once plugin_dir_path( __DIR__ ) . '../sign-in-with-google/vendor/autoload.php';
     }
     
     private function set_gsuite_raw_client() {
