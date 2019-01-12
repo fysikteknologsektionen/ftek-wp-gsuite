@@ -28,7 +28,7 @@ class Ftek_GSuite_Updater {
     
 	private function load_dependencies() {
         // Include Google's PHP library.
-        require_once plugin_dir_path( __DIR__ ) . '../sign-in-with-google/vendor/autoload.php';
+        require_once(self::get_library_path());
     }
     
     private function set_gsuite_raw_client() {
@@ -59,13 +59,28 @@ class Ftek_GSuite_Updater {
         $options = get_option( 'ftek_gsuite_settings' );
         return $options['ftek_gsuite_impersonator_email'];
     }
+
+    private static function get_library_path() {
+        $options = get_option( 'ftek_gsuite_settings' );
+        return $options['ftek_gsuite_library_path'];
+    }
      
     private static function get_credentials_path() {
         $options = get_option( 'ftek_gsuite_settings' );
         return $options['ftek_gsuite_credentials_path'];
     }
     
-    private function is_setup_functional() {  
+    private function is_setup_functional() {
+        // Check path
+        $lib_path = self::get_library_path();
+        if (!$lib_path) {
+            return false;
+        }
+        // Check file contents
+        $contents = file_get_contents($lib_path);
+        if (!$contents) {
+            return false;
+        }
         // Check path
         $cred_path = self::get_credentials_path();
         if (!$cred_path || !self::get_admin_email()) {
@@ -90,7 +105,7 @@ class Ftek_GSuite_Updater {
     * @access   private
     */
     public function get_test_data() {
-        $this->update_cache();
+        //$this->update_cache();
         $response = $this->gsuite_client->users->get(self::get_admin_email(), array('projection'=>'full'));
         $user = array(
             'name'   =>$response->name,

@@ -29,9 +29,6 @@ class Ftek_GSuite {
          return $links;
       });
       
-      // Require sign-in-with-google plugin
-      add_action( 'admin_init', 'ftek_gsuite_required_plugin_activated' );
-      
       // Settings
       add_action( 'admin_menu', array( $this, 'add_admin_menu' ) );
       add_action( 'admin_init', array( $this, 'settings_init' ) );
@@ -50,6 +47,11 @@ class Ftek_GSuite {
       $options = get_option( 'ftek_gsuite_settings' );
       return $options['ftek_gsuite_impersonator_email'];
    }
+
+   public static function get_library_path() {
+      $options = get_option( 'ftek_gsuite_settings' );
+      return $options['ftek_gsuite_library_path'];
+   }
    
    public static function get_credentials_path() {
       $options = get_option( 'ftek_gsuite_settings' );
@@ -61,7 +63,7 @@ class Ftek_GSuite {
    public function member_shortcode( $atts, $content = null ) {
       extract( shortcode_atts( array(
          'group' => '',
-         'include' => false
+         'exclude' => ''
       ), $atts ) );
       if ($group === '') {
          return '';
@@ -71,7 +73,8 @@ class Ftek_GSuite {
          return '';
       }
       $members = $groups->$group;
-      $members = array_filter($members, function($m) { return $m->show; });
+      $exclude = explode(',', $exclude);
+      $members = array_filter($members, function($m) { return ($m->show && !in_array($m->email, $exclude)); });
       if (!$members) {
          return '';
       }
@@ -123,6 +126,13 @@ class Ftek_GSuite {
          'pluginPage'
       );
       add_settings_field( 
+         'ftek_gsuite_library_path', 
+         __( 'Absolute path to Google API client autoload.php', 'ftek_gsuite' ), 
+         array($this, 'library_path_render'), 
+         'pluginPage', 
+         'ftek_gsuite_pluginPage_setup' 
+      );
+      add_settings_field( 
          'ftek_gsuite_credentials_path', 
          __( 'Absolute path to Google credentials file', 'ftek_gsuite' ), 
          array($this, 'credentials_path_render'), 
@@ -143,6 +153,13 @@ class Ftek_GSuite {
          array($this, 'settings_test_callback'), 
          'pluginPage'
       );
+   }
+
+   public function library_path_render(  ) { 
+      $options = get_option( 'ftek_gsuite_settings' );
+      ?>
+      <input type='text' name='ftek_gsuite_settings[ftek_gsuite_library_path]' value='<?php echo $options['ftek_gsuite_library_path']; ?>' placeholder='/path/to/autoload.php'>
+      <?php
    }
    
    public function credentials_path_render(  ) { 
@@ -170,6 +187,12 @@ class Ftek_GSuite {
    public function settings_test_callback(  ) {
       
       // Check path
+      $lib_path = self::get_library_path();
+      if (!$lib_path) {
+         echo __('No autoload file set.', 'ftek_gsuite');
+         return;
+      }
+      // Check path
       $cred_path = self::get_credentials_path();
       if (!$cred_path) {
          echo __('No credentials file set.', 'ftek_gsuite');
@@ -179,6 +202,13 @@ class Ftek_GSuite {
       $email = self::get_admin_email();
       if (!$email) {
          echo __('No admin email set.', 'ftek_gsuite');
+         return;
+      }
+      // Check file contents
+      $contents = file_get_contents($lib_path);
+      if (!$contents) {
+         echo __('Could not read autoload file. ', 'ftek_gsuite');
+         echo __('Make sure the server has read permissions on all files of the library.', 'ftek_gsuite');
          return;
       }
       // Check file contents

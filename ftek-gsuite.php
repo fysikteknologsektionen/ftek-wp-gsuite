@@ -3,7 +3,7 @@
 Plugin Name: Ftek G Suite
 Description: Provides functionality for fetching G Suite user and group data 
 Author: Johan Winther (johwin)
-Version: 1.0.2
+Version: 1.0.3
 Text Domain: ftek_gsuite
 Domain Path: /languages
 GitHub Plugin URI: Fysikteknologsektionen/ftek-gsuite
@@ -12,19 +12,6 @@ GitHub Plugin URI: Fysikteknologsektionen/ftek-gsuite
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {
 	die;
-}
-
-function ftek_gsuite_required_plugin_activated() {
-	if ( is_admin() && current_user_can( 'activate_plugins' ) &&  !is_plugin_active( 'sign-in-with-google/sign-in-with-google.php' ) ) {
-		add_action( 'admin_notices', function(){
-			?><div class="error"><p>Sorry, but the Ftek G Suite plugin requires the <a href="https://wordpress.org/plugins/sign-in-with-google/" rel="noreferrer">Sign In With Google plugin</a> to be installed and active.</p></div><?php
-		});
-		deactivate_plugins( plugin_basename( __FILE__ ) ); 
-		
-		if ( isset( $_GET['activate'] ) ) {
-			unset( $_GET['activate'] );
-		}
-	}
 }
 
 /**
