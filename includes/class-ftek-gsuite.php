@@ -233,14 +233,9 @@ class Ftek_GSuite {
          echo '<p>'. __( 'Test call failed! Here is the error message:', 'ftek_gsuite' ). '</p>';
          echo '<pre>' . json_encode(json_decode($e->getMessage()), JSON_PRETTY_PRINT) . '</pre>';
       }
-      echo '<label><input type="checkbox" name="update_db" value="on">Update database</label> (keep tab open until reloaded)';
    }
    
    public function options_page(  ) {
-      if ($_POST['update_db']) {
-         $updater = new Ftek_GSuite_Updater();
-         $updater->update_cache();
-      }
       ?>
       <form action='options.php' method='post'>
       <h2>G Suite Integration</h2>
