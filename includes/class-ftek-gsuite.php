@@ -83,7 +83,7 @@ class Ftek_GSuite {
          $user_id = get_user_by( 'email', $member->email );
          $user_id = $user_id->ID;
          $nickname = get_user_meta($user_id, 'nickname', true);
-         if ($nickname) { $nickname = '&ldquo;'.$nickname.'&rdquo; '; }
+         if ($nickname!=='null') { $nickname = '&ldquo;'.$nickname.'&rdquo; '; }
          $html .= '<div class="member">'
          . Ftek_GSuite_Updater::get_profile_pic($member->photo)
          . '<div class="member-info">'
