@@ -192,6 +192,8 @@ class Ftek_GSuite_Updater {
             if (!in_array($m_a[1][0], $role_order)) { $m_a[1][0] = 'Ledamot'; $m_a[2][0] = 999; }
             if (!in_array($m_b[1][0], $role_order)) { $m_b[1][0] = 'Ledamot'; $m_b[2][0] = 999; }
             if (!strcmp($m_a[1][0], $m_b[1][0])) {
+                if (!$m_a[2][0]) { $m_a[2][0] = 999; };
+                if (!$m_b[2][0]) { $m_b[2][0] = 999; };
                 return (intval($m_a[2][0])-intval($m_b[2][0])); 
             }
             return array_search($m_a[1][0], $role_order) - array_search($m_b[1][0], $role_order);
