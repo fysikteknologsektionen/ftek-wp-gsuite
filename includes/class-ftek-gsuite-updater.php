@@ -187,9 +187,14 @@ class Ftek_GSuite_Updater {
         
         usort($members, function($a, $b) {
             $role_order = ['Ordförande', 'Vice ordförande', 'Kassör', 'Ledamot'];
-            if (!in_array($a->type, $role_order)) { $a->type = 'Ledamot'; }
-            if (!in_array($b->type, $role_order)) { $b->type = 'Ledamot'; }
-            return array_search($a->type, $role_order) - array_search($b->type, $role_order);
+            preg_match_all("/(.*?) ?(\d+)?$/", $a->type, $m_a);
+            preg_match_all("/(.*?) ?(\d+)?$/", $b->type, $m_b);
+            if (!in_array($m_a[1][0], $role_order)) { $m_a[1][0] = 'Ledamot'; $m_a[2][0] = 999; }
+            if (!in_array($m_b[1][0], $role_order)) { $m_b[1][0] = 'Ledamot'; $m_b[2][0] = 999; }
+            if (!strcmp($m_a[1][0], $m_b[1][0])) {
+                return (intval($m_a[2][0])-intval($m_b[2][0])); 
+            }
+            return array_search($m_a[1][0], $role_order) - array_search($m_b[1][0], $role_order);
         });
         
         return $members;
