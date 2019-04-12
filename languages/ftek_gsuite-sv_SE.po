@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Ftek GSuite\n"
-"POT-Creation-Date: 2019-04-12 16:54+0200\n"
-"PO-Revision-Date: 2019-04-12 16:54+0200\n"
+"POT-Creation-Date: 2019-04-12 18:45+0200\n"
+"PO-Revision-Date: 2019-04-12 18:46+0200\n"
 "Last-Translator: Ossian Eriksson <ossiane@student.chalmers.se>\n"
 "Language-Team: \n"
 "Language: sv\n"
@@ -17,68 +17,72 @@ msgstr ""
 "esc_attr_e;esc_attr_x;number_format_i18n;date_i18n\n"
 "X-Poedit-SearchPath-0: .\n"
 
-#: includes/class-ftek-gsuite.php:120
+#: includes/class-ftek-gsuite.php:143
+msgid "Number of vacant positions: %i."
+msgstr "Antal vakanta poster: %i."
+
+#: includes/class-ftek-gsuite.php:159
 msgid "Instructions"
 msgstr "Instruktioner"
 
-#: includes/class-ftek-gsuite.php:127
+#: includes/class-ftek-gsuite.php:166
 msgid "Settings"
 msgstr "Inställningar"
 
-#: includes/class-ftek-gsuite.php:133
+#: includes/class-ftek-gsuite.php:172
 msgid "Absolute path to Google API client autoload.php"
 msgstr "Absolut sökväg till Googles API-klient autoload.php"
 
-#: includes/class-ftek-gsuite.php:140
+#: includes/class-ftek-gsuite.php:179
 msgid "Absolute path to Google credentials file"
 msgstr "Absolut sökväg till Google credentials-filen"
 
-#: includes/class-ftek-gsuite.php:147
+#: includes/class-ftek-gsuite.php:186
 msgid "Email of a G Suite admin"
 msgstr "Email till en G Suite admin"
 
-#: includes/class-ftek-gsuite.php:155
+#: includes/class-ftek-gsuite.php:194
 msgid "Connection test"
 msgstr "Anslutningstest"
 
-#: includes/class-ftek-gsuite.php:183
+#: includes/class-ftek-gsuite.php:222
 msgid "These fields are required for the G Suite integration."
 msgstr "Dessa fält är obligatoriska för G Suite integration."
 
-#: includes/class-ftek-gsuite.php:187
+#: includes/class-ftek-gsuite.php:226
 msgid "Follow these instructions:"
 msgstr "Följ dessa instruktioner:"
 
-#: includes/class-ftek-gsuite.php:195
+#: includes/class-ftek-gsuite.php:234
 msgid "No autoload file set."
 msgstr "Ingen autoload-fil har angetts."
 
-#: includes/class-ftek-gsuite.php:201
+#: includes/class-ftek-gsuite.php:240
 msgid "No credentials file set."
 msgstr "Ingen credentials-fil har angetts."
 
-#: includes/class-ftek-gsuite.php:207
+#: includes/class-ftek-gsuite.php:246
 msgid "No admin email set."
 msgstr "Ingen mejladress till en administratör har angetts."
 
-#: includes/class-ftek-gsuite.php:213
+#: includes/class-ftek-gsuite.php:252
 msgid "Could not read autoload file. "
 msgstr "Kunde inte läsa autoload-filen."
 
-#: includes/class-ftek-gsuite.php:214
+#: includes/class-ftek-gsuite.php:253
 msgid "Make sure the server has read permissions on all files of the library."
 msgstr ""
 "Kontrollera så att servern har läsrättigheter till alla filer i biblioteket."
 
-#: includes/class-ftek-gsuite.php:220
+#: includes/class-ftek-gsuite.php:259
 msgid "Could not read credential file. "
 msgstr "Kunde inte läsa credentials-filen."
 
-#: includes/class-ftek-gsuite.php:221
+#: includes/class-ftek-gsuite.php:260
 msgid "Make sure the server has read permissions."
 msgstr "Kontrollera att servern har läsrättigheter."
 
-#: includes/class-ftek-gsuite.php:226
+#: includes/class-ftek-gsuite.php:265
 msgid ""
 "Error in credential file. Make sure it is the credentials file for a service "
 "account!"
@@ -86,10 +90,10 @@ msgstr ""
 "Fel i en credentials-fil. Kontrollera att det är credentials-filen till ett "
 "service-konto!"
 
-#: includes/class-ftek-gsuite.php:233
+#: includes/class-ftek-gsuite.php:272
 msgid "Test call successful! Here are the results:"
 msgstr "Testanslutningen lyckades! Här är resultatet:"
 
-#: includes/class-ftek-gsuite.php:236
+#: includes/class-ftek-gsuite.php:275
 msgid "Test call failed! Here is the error message:"
 msgstr "Testanslutningen misslyckades! Här är felmeddelandet:"

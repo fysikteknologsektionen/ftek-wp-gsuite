@@ -36,6 +36,7 @@ class Ftek_GSuite {
       
       // Shortcode
       add_shortcode('ftek_gsuite_members', array($this, 'member_shortcode'));
+      add_shortcode('ftek_gsuite_vacants', array($this, 'vacant_shortcode'));
    }
    
    public static function update_cache() {
@@ -56,6 +57,23 @@ class Ftek_GSuite {
    public static function get_credentials_path() {
       $options = get_option( 'ftek_gsuite_settings' );
       return $options['ftek_gsuite_credentials_path'];
+   }
+
+   public static function get_vacant_count($group = '', $exclude = '') {
+      if ($group === '') {
+         return -1;
+      }
+
+      $groups = json_decode(get_option('ftek_gsuite_groups'));
+      if (!property_exists($groups, $group)) {
+         return -1;
+      }
+
+      $members = $groups->$group;
+      $exclude = explode(',', $exclude);
+      $members = array_filter($members, function($m) { return ($m->vacant && !in_array($m->email, $exclude)); });
+      
+      return count( $members );
    }
    
    
@@ -105,6 +123,27 @@ class Ftek_GSuite {
          . '</div>'.'</div>';
       }
       return $html;
+   }
+
+   public function vacant_shortcode( $atts, $content = '' ) {
+      extract( shortcode_atts( array(
+         'group' => '',
+         'exclude' => '',
+         'disp_zero_count' => false
+      ), $atts ) );
+
+      $disp_zero_count = $disp_zero_count && $disp_zero_count !== 'false';
+
+      $vacant_count = Ftek_GSuite::get_vacant_count($group, $exclude);
+      if ($vacant_count < 0 || ($vacant_count == 0  && !$disp_zero_count)) {
+         return '';
+      }
+
+      if ( empty( $content ) ) {
+         $content = __( 'Number of vacant positions: %i.', 'ftek_gsuite' );
+      }
+
+      return '<div class="member-vacancy"><div class="vacant-count">'.str_replace('%i', $vacant_count, $content).'</div></div>';
    }
    
    // Settings Page
