@@ -1,0 +1,92 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Ftek GSuite\n"
+"POT-Creation-Date: 2019-04-12 16:54+0200\n"
+"PO-Revision-Date: 2019-04-12 16:55+0200\n"
+"Last-Translator: Ossian Eriksson <ossiane@student.chalmers.se>\n"
+"Language-Team: \n"
+"Language: sv\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 2.2.1\n"
+"X-Poedit-Basepath: ..\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Poedit-KeywordsList: __;_e;_x;_ex;_n;_nx;_n_noop;_nx_noop;"
+"translate_nooped_plural;esc_html__;esc_html_e;esc_html_x;esc_attr__;"
+"esc_attr_e;esc_attr_x;number_format_i18n;date_i18n\n"
+"X-Poedit-SearchPath-0: .\n"
+
+#: includes/class-ftek-gsuite.php:120
+msgid "Instructions"
+msgstr ""
+
+#: includes/class-ftek-gsuite.php:127
+msgid "Settings"
+msgstr ""
+
+#: includes/class-ftek-gsuite.php:133
+msgid "Absolute path to Google API client autoload.php"
+msgstr ""
+
+#: includes/class-ftek-gsuite.php:140
+msgid "Absolute path to Google credentials file"
+msgstr ""
+
+#: includes/class-ftek-gsuite.php:147
+msgid "Email of a G Suite admin"
+msgstr ""
+
+#: includes/class-ftek-gsuite.php:155
+msgid "Connection test"
+msgstr ""
+
+#: includes/class-ftek-gsuite.php:183
+msgid "These fields are required for the G Suite integration."
+msgstr ""
+
+#: includes/class-ftek-gsuite.php:187
+msgid "Follow these instructions:"
+msgstr ""
+
+#: includes/class-ftek-gsuite.php:195
+msgid "No autoload file set."
+msgstr ""
+
+#: includes/class-ftek-gsuite.php:201
+msgid "No credentials file set."
+msgstr ""
+
+#: includes/class-ftek-gsuite.php:207
+msgid "No admin email set."
+msgstr ""
+
+#: includes/class-ftek-gsuite.php:213
+msgid "Could not read autoload file. "
+msgstr ""
+
+#: includes/class-ftek-gsuite.php:214
+msgid "Make sure the server has read permissions on all files of the library."
+msgstr ""
+
+#: includes/class-ftek-gsuite.php:220
+msgid "Could not read credential file. "
+msgstr ""
+
+#: includes/class-ftek-gsuite.php:221
+msgid "Make sure the server has read permissions."
+msgstr ""
+
+#: includes/class-ftek-gsuite.php:226
+msgid ""
+"Error in credential file. Make sure it is the credentials file for a service "
+"account!"
+msgstr ""
+
+#: includes/class-ftek-gsuite.php:233
+msgid "Test call successful! Here are the results:"
+msgstr ""
+
+#: includes/class-ftek-gsuite.php:236
+msgid "Test call failed! Here is the error message:"
+msgstr ""

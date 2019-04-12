@@ -38,6 +38,9 @@ define('PLUGIN_NAME', plugin_basename(__FILE__));
 // Includes
 require_once( plugin_dir_path( __FILE__ ) . 'includes/class-ftek-gsuite.php');
 
+// Load plugin translation strings
+load_plugin_textdomain('ftek_gsuite', false, basename( dirname( __FILE__ ) ) . '/languages' );
+
 function ftek_gsuite_run() {
 	$plugin = new Ftek_GSuite();
 }
