@@ -147,7 +147,7 @@ class Ftek_GSuite_Updater {
                 });
                 
                 $this->gsuite_raw_client->setUseBatch(true);
-                $batch = new Google_Http_Batch($this->gsuite_raw_client);
+                $batch = new Google_Http_Batch($this->gsuite_raw_client, false, null, 'batch/admin/v1');
                 array_walk($response_members, function($member, $key, $batch) {
                     $user = $this->gsuite_client->users->get($member->email, array('projection'=>'full'));
                     $batch->add($user, $member->email);
