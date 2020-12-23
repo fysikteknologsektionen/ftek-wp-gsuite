@@ -122,7 +122,7 @@ class Ftek_GSuite {
       }
       $members = $groups->$group;
       $exclude = explode(',', $exclude);
-      $members = array_filter($members, function($m) { return ( !in_array($m->email, $exclude)); }); #!$m->closed &&
+      $members = array_filter($members, function($m) { return (!$m->closed && !in_array($m->email, $exclude)); }); 
       if (!$members) {
          return '';
       }
@@ -137,13 +137,13 @@ class Ftek_GSuite {
          }
          $html .= '<div class="member">'
          . Ftek_GSuite_Updater::get_profile_pic($member->photo)
-         . '<div class="member-info">'. $member->vacant . "| " . $member->closed
+         . '<div class="member-info">'
          . '<div class="member-name">'
-         . $member->givenName.' '.$nickname.$member->familyName
+         . $member->position
          . '</div>'
          . '<div class="member-meta">'
          . '<span class="member-position">'
-         . $member->position
+         . ''
          . '</span>'
          . ' (<a href="mailto:'.$member->email.'" class="member-email" target="_blank" rel="noopener">'.$member->email.'</a>)'
          . '</div>'
