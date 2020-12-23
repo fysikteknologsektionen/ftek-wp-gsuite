@@ -137,7 +137,7 @@ class Ftek_GSuite {
          }
          $html .= '<div class="member">'
          . Ftek_GSuite_Updater::get_profile_pic($member->photo)
-         . '<div class="member-info">'. $member->vacant
+         . '<div class="member-info">'. $member->vacant . "| " . $member->closed
          . '<div class="member-name">'
          . $member->givenName.' '.$nickname.$member->familyName
          . '</div>'
