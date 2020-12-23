@@ -172,7 +172,7 @@ class Ftek_GSuite_Updater {
                         $m->vacant = $user->customSchemas['Sektion']['vacantPost'];
                         $m->show = false;
                 
-                        $m->closed = !$m->vacant;
+                        $m->closed = (boolval($m->vacant) ? 0 : 1);
 
                     } else {
                         $m->vacant = false;
