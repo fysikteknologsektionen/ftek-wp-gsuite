@@ -36,6 +36,7 @@ class Ftek_GSuite {
       
       // Shortcode
       add_shortcode('ftek_gsuite_members', array($this, 'member_shortcode'));
+      add_shortcode('ftek_gsuite_vacant', array($this, 'vacant_shortcode'));
    }
    
    public static function update_cache() {
@@ -90,6 +91,53 @@ class Ftek_GSuite {
          $html .= '<div class="member">'
          . Ftek_GSuite_Updater::get_profile_pic($member->photo)
          . '<div class="member-info">'
+         . '<div class="member-name">'
+         . $member->givenName.' '.$nickname.$member->familyName
+         . '</div>'
+         . '<div class="member-meta">'
+         . '<span class="member-position">'
+         . $member->position
+         . '</span>'
+         . ' (<a href="mailto:'.$member->email.'" class="member-email" target="_blank" rel="noopener">'.$member->email.'</a>)'
+         . '</div>'
+         . '<div class="member-bio">'
+         . get_user_meta($user_id, 'description', true)
+         . '</div>'
+         . '</div>'.'</div>';
+      }
+      return $html;
+   }
+
+   public function vacant_shortcode( $atts, $content = null ) {
+      extract( shortcode_atts( array(
+         'group' => '',
+         'exclude' => ''
+      ), $atts ) );
+      if ($group === '') {
+         return '';
+      }
+      $groups = json_decode(get_option('ftek_gsuite_groups'));
+      if (!property_exists($groups, $group)) {
+         return '';
+      }
+      $members = $groups->$group;
+      $exclude = explode(',', $exclude);
+      $members = array_filter($members, function($m) { return ( !in_array($m->email, $exclude)); }); #!$m->closed &&
+      if (!$members) {
+         return '';
+      }
+      $html = '';
+      foreach ($members as $member) {
+         $user_id = get_user_by( 'email', $member->email );
+         $user_id = $user_id->ID;
+         $nickname = get_user_meta($user_id, 'nickname', true);
+         if (substr($nickname, -8) === '@ftek.se' || $nickname === 'null') { $nickname = null; }
+         if ($nickname) {
+            $nickname = '&ldquo;'.$nickname.'&rdquo; '; 
+         }
+         $html .= '<div class="member">'
+         . Ftek_GSuite_Updater::get_profile_pic($member->photo)
+         . '<div class="member-info">'. $member->vacant
          . '<div class="member-name">'
          . $member->givenName.' '.$nickname.$member->familyName
          . '</div>'

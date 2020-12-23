@@ -171,6 +171,9 @@ class Ftek_GSuite_Updater {
                     if ( !empty($user->customSchemas) && array_key_exists('Sektion', $user->customSchemas) && array_key_exists('vacantPost', $user->customSchemas['Sektion']) ) {
                         $m->vacant = $user->customSchemas['Sektion']['vacantPost'];
                         $m->show = false;
+                
+                        $m->closed = !$m->vacant;
+
                     } else {
                         $m->vacant = false;
                         $m->show = true;
