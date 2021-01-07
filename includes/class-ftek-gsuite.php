@@ -112,7 +112,7 @@ class Ftek_GSuite {
       extract( shortcode_atts( array(
          'group' => '',
          'exclude' => '',
-         'listType' => '' #number
+         'list_type' => '' #number
       ), $atts ) );
       if ($group === '') {
          return '';
@@ -129,7 +129,7 @@ class Ftek_GSuite {
       }
       $html = '';
       
-      if ($listType === 'number') {
+      if ($list_type === 'number') {
          $html .= '<div class="member">'
          . Ftek_GSuite_Updater::get_profile_pic(False)
          . '<div class="member-info">'
