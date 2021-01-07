@@ -111,7 +111,8 @@ class Ftek_GSuite {
    public function vacant_shortcode( $atts, $content = null ) {
       extract( shortcode_atts( array(
          'group' => '',
-         'exclude' => ''
+         'exclude' => '',
+         'listType' => '' #number
       ), $atts ) );
       if ($group === '') {
          return '';
@@ -127,6 +128,25 @@ class Ftek_GSuite {
          return '';
       }
       $html = '';
+      
+      if ($listType ==  'number') {
+         $html .= '<div class="member">'
+         . Ftek_GSuite_Updater::get_profile_pic(False)
+         . '<div class="member-info">'
+         . '<div class="member-name">'
+         . sizeof($members) . ' vakanta poster'
+         . '</div>'
+         . '<div class="member-meta">'
+         . '<span class="member-position">'
+         . ''
+         . '</span>'
+         . ' (<a href="mailto:'.$group.'" class="member-email" target="_blank" rel="noopener">'.$group.'</a>)'
+         . '</div>'
+         . '</div>'.'</div>';
+
+         return $html;
+      }
+
       foreach ($members as $member) {
          $user_id = get_user_by( 'email', $member->email );
          $user_id = $user_id->ID;
