@@ -129,7 +129,7 @@ class Ftek_GSuite {
       }
       $html = '';
       
-      if ($listType ==  'number') {
+      if ($listType === 'number') {
          $html .= '<div class="member">'
          . Ftek_GSuite_Updater::get_profile_pic(False)
          . '<div class="member-info">'
