@@ -161,7 +161,7 @@ class Ftek_GSuite_Updater {
                     $m->givenName = $user->name->givenName;
                     $m->familyName = $user->name->familyName;
                     $m->position = $user->organizations[0]['title'];
-                    $m->type = $user->organizations[0]['description'];
+                    $m->type = isset( $user->organizations[0]['description'] ) ? $user->organizations[0]['description'] : '';
                     try {
                         $photo = $this->gsuite_client->users_photos->get($m->email);
                         $m->photo = $photo->photoData;
