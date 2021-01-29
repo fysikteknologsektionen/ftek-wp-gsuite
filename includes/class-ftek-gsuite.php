@@ -75,7 +75,7 @@ class Ftek_GSuite {
       }
       $members = $groups->$group;
       $exclude = explode(',', $exclude);
-      $members = array_filter($members, function($m) { return ($m->show && !in_array($m->email, $exclude)); });
+      $members = array_filter($members, function($m) use ($exclude) { return ($m->show && !in_array($m->email, $exclude)); });
       if (!$members) {
          return '';
       }
