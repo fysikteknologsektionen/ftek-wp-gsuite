@@ -158,9 +158,9 @@ class Ftek_GSuite_Updater {
                     $user = $batch_results['response-'.$member->email];
                     $m = new stdClass();
                     $m->email = $member->email;
-                    $m->givenName = $user->name->givenName;
-                    $m->familyName = $user->name->familyName;
-                    $m->position = $user->organizations[0]['title'];
+                    $m->givenName = isset( $user->name->givenName ) ? $user->name->givenName : '';
+                    $m->familyName = isset( $user->name->familyName ) ? $user->name->familyName : '';
+                    $m->position = isset( $user->organizations[0]['title'] ) ? $user->organizations[0]['title'] : '';
                     $m->type = isset( $user->organizations[0]['description'] ) ? $user->organizations[0]['description'] : '';
                     try {
                         $photo = $this->gsuite_client->users_photos->get($m->email);
