@@ -74,7 +74,7 @@ class Ftek_GSuite {
          return '';
       }
       $members = $groups->$group;
-      $exclude = explode(',', $exclude);
+      $exclude = $exclude === '' ? array() : explode(',', $exclude);
       $members = array_filter($members, function($m) use ($exclude) { return ($m->show && !in_array($m->email, $exclude)); });
       if (!$members) {
          return '';
@@ -122,31 +122,31 @@ class Ftek_GSuite {
          return '';
       }
       $members = $groups->$group;
-      $exclude = explode(',', $exclude);
+      $exclude = $exclude === '' ? array() : explode(',', $exclude);
       $members = array_filter($members, function($m) { return (!$m->closed && !$m->show && !in_array($m->email, $exclude)); }); 
       if (!$members) {
          return '';
       }
-      $html = '';
       
       if ($list_type === 'number') {
-         $html .= '<div class="member">'
-         . Ftek_GSuite_Updater::get_profile_pic(False)
-         . '<div class="member-info">'
-         . '<div class="member-name">'
-         . sizeof($members) . ' vakanta poster'
-         . '</div>'
-         . '<div class="member-meta">'
-         . '<span class="member-position">'
-         . ''
-         . '</span>'
-         . ' (<a href="mailto:'.$group.'" class="member-email" target="_blank" rel="noopener">'.$group.'</a>)'
-         . '</div>'
-         . '</div>'.'</div>';
-
-         return $html;
+         return (
+            '<div class="member">'
+            . Ftek_GSuite_Updater::get_profile_pic(False)
+            . '<div class="member-info">'
+            . '<div class="member-name">'
+            . sizeof($members) . ' vakanta poster'
+            . '</div>'
+            . '<div class="member-meta">'
+            . '<span class="member-position">'
+            . ''
+            . '</span>'
+            . ' (<a href="mailto:'.$group.'" class="member-email" target="_blank" rel="noopener">'.$group.'</a>)'
+            . '</div>'
+            . '</div>'.'</div>'
+         );
       }
 
+      $html = '';
       foreach ($members as $member) {
          $user_id = get_user_by( 'email', $member->email );
          $user_id = $user_id->ID;
