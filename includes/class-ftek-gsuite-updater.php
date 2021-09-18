@@ -36,7 +36,7 @@ class Ftek_GSuite_Updater {
             return null;
         }
         $client = new Google_Client();
-        $client->setAuthConfig(Ftek_GSuite::get_credentials_path());
+        $client->setAuthConfig(Ftek_GSuite_Updater::get_credentials_path());
         $client->setApplicationName("Ftek GSuite Plugin");
         $client->setScopes([
             'https://www.googleapis.com/auth/admin.directory.group.readonly',
