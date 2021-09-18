@@ -10,13 +10,15 @@
 
 class Ftek_GSuite_Updater {
     
-    protected $gsuite_raw_client;
-    protected $gsuite_client;
+    protected $google_raw_client;
+    protected $directory_client;
+    protected $people_client;
     
     public function __construct(  ) {
         $this->load_dependencies();
-        $this->gsuite_raw_client = $this->set_gsuite_raw_client();
-        $this->gsuite_client = $this->set_gsuite_client( $this->gsuite_raw_client );
+        $this->google_raw_client = $this->create_google_raw_client();
+        $this->directory_client = $this->create_directory_client( $this->google_raw_client );
+        $this->people_client = $this->create_people_client( $this->google_raw_client );
     }
     
     /**
@@ -31,27 +33,36 @@ class Ftek_GSuite_Updater {
         require_once(self::get_library_path());
     }
     
-    private function set_gsuite_raw_client() {
+    private function create_google_raw_client() {
         if (!$this->is_setup_functional()) {
             return null;
         }
         $client = new Google_Client();
-        $client->setAuthConfig(Ftek_GSuite::get_credentials_path());
+        $client->setAuthConfig(Ftek_GSuite_Updater::get_credentials_path());
         $client->setApplicationName("Ftek GSuite Plugin");
         $client->setScopes([
             'https://www.googleapis.com/auth/admin.directory.group.readonly',
             'https://www.googleapis.com/auth/admin.directory.user.readonly',
-            'https://www.googleapis.com/auth/admin.directory.userschema.readonly']
-        );
+            'https://www.googleapis.com/auth/admin.directory.userschema.readonly',
+            'https://www.googleapis.com/auth/user.organization.read',
+        ]);
         $client->setSubject(self::get_admin_email());
         return $client;
     }
     
-    private function set_gsuite_client( $client ) {
+    private function create_directory_client( $client ) {
         if (!$this->is_setup_functional()) {
             return null;
         }
         $service_client = new Google_Service_Directory($client);
+        return $service_client;
+    }
+
+    private function create_people_client( $client ) {
+        if (!$this->is_setup_functional()) {
+            return null;
+        }
+        $service_client = new Google_Service_PeopleService($client);
         return $service_client;
     }
 
@@ -106,7 +117,7 @@ class Ftek_GSuite_Updater {
     */
     public function get_test_data() {
         //$this->update_cache();
-        $response = $this->gsuite_client->users->get(self::get_admin_email(), array('projection'=>'full'));
+        $response = $this->directory_client->users->get(self::get_admin_email(), array('projection'=>'full'));
         $user = array(
             'name'   =>$response->name,
             'email'  =>$response->primaryEmail,
@@ -117,17 +128,12 @@ class Ftek_GSuite_Updater {
         return $user;
     }
     
-    public static function profile_pic_src($photo) {
-        return 'data:image/jpeg;charset=utf-8;base64, ' .strtr($photo,'-_','+/');
-    }
     
     public static function get_profile_pic( $photo ) {
-        if ($photo) {
-            return '<img src="'.self::profile_pic_src($photo).'" class="avatar avatar-75 photo" alt="Profile picture" />';
-        } else {
-            $url = "https://www.gravatar.com/avatar/?s=75&d=mm&f=y";
-            return '<img src="'.$url.'" class="avatar avatar-75 photo" alt="Profile picture" />';
+        if (!$photo) {
+            $photo = 'https://www.gravatar.com/avatar/?s=75&d=mm&f=y';
         }
+        return '<img src="'.$photo.'" class="avatar avatar-75 photo" alt="Profile picture" />';
     }
     
     private function get_group_members( $email, $include = false ) {
@@ -141,19 +147,19 @@ class Ftek_GSuite_Updater {
                     'includeDerivedMembership' => $include,
                     'pageToken' => $response->nextPageToken,
                 );
-                $response = $this->gsuite_client->members->listMembers($email, $opts);
+                $response = $this->directory_client->members->listMembers($email, $opts);
                 $response_members = array_filter($response->members, function($member) {
                     return $member->type==='USER';
                 });
                 
-                $this->gsuite_raw_client->setUseBatch(true);
-                $batch = new Google_Http_Batch($this->gsuite_raw_client, false, null, 'batch/admin/v1');
+                $this->google_raw_client->setUseBatch(true);
+                $batch = new Google_Http_Batch($this->google_raw_client, false, null, 'batch/admin/v1');
                 array_walk($response_members, function($member, $key, $batch) {
-                    $user = $this->gsuite_client->users->get($member->email, array('projection'=>'full'));
+                    $user = $this->directory_client->users->get($member->email, array('projection'=>'full'));
                     $batch->add($user, $member->email);
                 }, $batch); 
                 $batch_results = $batch->execute();
-                $this->gsuite_raw_client->setUseBatch(false);
+                $this->google_raw_client->setUseBatch(false);
                 $response_members = array_map(function($member) use ($batch_results) {
                     $user = $batch_results['response-'.$member->email];
                     $m = new stdClass();
@@ -171,9 +177,24 @@ class Ftek_GSuite_Updater {
                         }
                     }
                     try {
-                        $photo = $this->gsuite_client->users_photos->get($m->email);
-                        $m->photo = $photo->photoData;
+                        for ($i = 0; $i < 5; $i++) {
+                            try {
+                                $photo_response = $this->people_client->people->get('people/'.$member->id, array('personFields' => array('photos')));
+                                break;
+                            } catch (Google\Service\Exception $e) {
+                                if ($e->getErrors()[0]['reason'] === 'rateLimitExceeded') {
+                                    sleep(max(1, $i * 10));
+                                } else {
+                                    throw $e;
+                                }
+                            }
+                        }
+                        $photo_object = current(array_filter($photo_response->photos, function($photo) {
+                            return !$photo->default && $photo->metadata->primary && $photo->metadata->source->type === 'PROFILE';
+                        }));
+                        $m->photo = $photo_object ? $photo_object->url : null;
                     } catch(Exception $e) {
+                        print($e);
                         $m->photo = null;
                     }
                     if ( !empty($user->customSchemas) && array_key_exists('Sektion', $user->customSchemas) && array_key_exists('vacantPost', $user->customSchemas['Sektion']) ) {
