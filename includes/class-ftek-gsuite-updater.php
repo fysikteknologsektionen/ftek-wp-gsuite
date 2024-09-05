@@ -12,13 +12,11 @@ class Ftek_GSuite_Updater {
     
     protected $google_raw_client;
     protected $directory_client;
-    protected $people_client;
     
     public function __construct(  ) {
         $this->load_dependencies();
         $this->google_raw_client = $this->create_google_raw_client();
         $this->directory_client = $this->create_directory_client( $this->google_raw_client );
-        $this->people_client = $this->create_people_client( $this->google_raw_client );
     }
     
     /**
@@ -55,14 +53,6 @@ class Ftek_GSuite_Updater {
             return null;
         }
         $service_client = new Google_Service_Directory($client);
-        return $service_client;
-    }
-
-    private function create_people_client( $client ) {
-        if (!$this->is_setup_functional()) {
-            return null;
-        }
-        $service_client = new Google_Service_PeopleService($client);
         return $service_client;
     }
 
