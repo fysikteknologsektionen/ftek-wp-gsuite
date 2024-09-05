@@ -14,6 +14,7 @@ class Ftek_GSuite {
    public function __construct(  ) {
       require_once 'class-ftek-gsuite-updater.php';
       $this->define_hooks();
+      $this->update_cache();
 	}
    
    /**

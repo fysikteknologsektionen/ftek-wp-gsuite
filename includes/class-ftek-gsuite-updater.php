@@ -12,13 +12,11 @@ class Ftek_GSuite_Updater {
     
     protected $google_raw_client;
     protected $directory_client;
-    protected $people_client;
     
     public function __construct(  ) {
         $this->load_dependencies();
         $this->google_raw_client = $this->create_google_raw_client();
         $this->directory_client = $this->create_directory_client( $this->google_raw_client );
-        $this->people_client = $this->create_people_client( $this->google_raw_client );
     }
     
     /**
@@ -55,14 +53,6 @@ class Ftek_GSuite_Updater {
             return null;
         }
         $service_client = new Google_Service_Directory($client);
-        return $service_client;
-    }
-
-    private function create_people_client( $client ) {
-        if (!$this->is_setup_functional()) {
-            return null;
-        }
-        $service_client = new Google_Service_PeopleService($client);
         return $service_client;
     }
 
@@ -176,27 +166,7 @@ class Ftek_GSuite_Updater {
                             $m->type = $user->organizations[0]['description'];
                         }
                     }
-                    try {
-                        for ($i = 0; $i < 5; $i++) {
-                            try {
-                                $photo_response = $this->people_client->people->get('people/'.$member->id, array('personFields' => array('photos')));
-                                break;
-                            } catch (Google\Service\Exception $e) {
-                                if ($e->getErrors()[0]['reason'] === 'rateLimitExceeded') {
-                                    sleep(max(1, $i * 10));
-                                } else {
-                                    throw $e;
-                                }
-                            }
-                        }
-                        $photo_object = current(array_filter($photo_response->photos, function($photo) {
-                            return !$photo->default && $photo->metadata->primary && $photo->metadata->source->type === 'PROFILE';
-                        }));
-                        $m->photo = $photo_object ? $photo_object->url : null;
-                    } catch(Exception $e) {
-                        print($e);
-                        $m->photo = null;
-                    }
+                    $m->photo = isset( $user->thumbnailPhotoUrl ) ? $user->thumbnailPhotoUrl : null;
                     if ( !empty($user->customSchemas) && array_key_exists('Sektion', $user->customSchemas) && array_key_exists('vacantPost', $user->customSchemas['Sektion']) ) {
                         $m->vacant = $user->customSchemas['Sektion']['vacantPost'];
                         $m->show = false;
