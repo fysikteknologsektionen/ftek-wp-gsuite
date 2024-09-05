@@ -3,7 +3,7 @@
 Plugin Name: Ftek G Suite
 Description: Provides functionality for fetching G Suite user and group data 
 Author: Johan Winther (johwin)
-Version: 1.5.1
+Version: 1.6.0
 Text Domain: ftek_gsuite
 Domain Path: /languages
 GitHub Plugin URI: fysikteknologsektionen/ftek-gsuite
