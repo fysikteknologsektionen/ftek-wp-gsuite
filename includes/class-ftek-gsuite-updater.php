@@ -176,27 +176,7 @@ class Ftek_GSuite_Updater {
                             $m->type = $user->organizations[0]['description'];
                         }
                     }
-                    try {
-                        for ($i = 0; $i < 5; $i++) {
-                            try {
-                                $photo_response = $this->people_client->people->get('people/'.$member->id, array('personFields' => array('photos')));
-                                break;
-                            } catch (Google\Service\Exception $e) {
-                                if ($e->getErrors()[0]['reason'] === 'rateLimitExceeded') {
-                                    sleep(max(1, $i * 10));
-                                } else {
-                                    throw $e;
-                                }
-                            }
-                        }
-                        $photo_object = current(array_filter($photo_response->photos, function($photo) {
-                            return !$photo->default && $photo->metadata->primary && $photo->metadata->source->type === 'PROFILE';
-                        }));
-                        $m->photo = $photo_object ? $photo_object->url : null;
-                    } catch(Exception $e) {
-                        print($e);
-                        $m->photo = null;
-                    }
+                    $m->photo = isset( $user->thumbnailPhotoUrl ) ? $user->thumbnailPhotoUrl : null;
                     if ( !empty($user->customSchemas) && array_key_exists('Sektion', $user->customSchemas) && array_key_exists('vacantPost', $user->customSchemas['Sektion']) ) {
                         $m->vacant = $user->customSchemas['Sektion']['vacantPost'];
                         $m->show = false;
